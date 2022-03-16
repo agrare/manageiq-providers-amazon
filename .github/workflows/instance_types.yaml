@@ -1,0 +1,41 @@
+name: Update Instance Types
+
+on:
+  push:
+  schedule:
+  - cron: '0 0 * * 0'
+
+jobs:
+  update-instance-types:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: manageiq/postgresql:10
+        env:
+          POSTGRESQL_USER: root
+          POSTGRESQL_PASSWORD: smartvm
+          POSTGRESQL_DATABASE: vmdb_test
+        options: --health-cmd pg_isready --health-interval 2s --health-timeout 5s --health-retries 5
+        ports:
+        - 5432:5432
+    env:
+      PGHOST: localhost
+      PGPASSWORD: smartvm
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up system
+      run: bin/before_install
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7
+        bundler-cache: true
+    - name: Prepare tests
+      run: bin/setup
+    - name: Run instance_types rake task
+      run: bundle exec rake aws:extract:instance_types
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        add-paths: db/fixtures/aws_instance_types.yml
+        commit-message: Update AWS instance_types
