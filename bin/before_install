@@ -19,6 +19,4 @@ elif [ ! -d "$spec_manageiq" ]; then
   git clone https://github.com/agrare/manageiq.git --branch radjabov_dont_setup_gemfile_lock_plugins --depth 1 "$spec_manageiq"
   echo "Copying $spec_manageiq/Gemfile.lock.release to $gem_root/Gemfile.lock"
   cp $spec_manageiq/Gemfile.lock.release $gem_root/Gemfile.lock
-  echo "Patching Gemfile.lock"
-  $spec_manageiq/bin/ci/patch_plugin_gemfile_lock
 fi
